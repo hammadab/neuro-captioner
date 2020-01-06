@@ -1,10 +1,19 @@
-import numpy as np
 import h5py
 from PIL import Image
 import requests
 from io import BytesIO
-import urllib.request
 import multiprocessing
+
+
+def image_downloader(index):
+    try:
+        response = requests.get(train_url[index])
+        img = Image.open(BytesIO(response.content))
+        img.save("./" + str(index) + ".jpg")
+        return -1
+    except Exception:
+        return index
+
 
 with h5py.File("eee443_project_dataset_train.h5", 'r') as f:
     keys = list(f.keys())
@@ -15,26 +24,14 @@ with h5py.File("eee443_project_dataset_train.h5", 'r') as f:
     word_code = f[keys[4]].value
     f.close()
 
-not_found = []
-
-
-def blah(image_path):
-    try:
-        response = requests.get(train_url[image_path])
-        img = Image.open(BytesIO(response.content))
-        imnp = np.asarray(img)
-        img.save("./" + str(image_path) + ".jpg")
-        return -1
-    except Exception as e:
-        return image_path
-
-
+temp_not_found = []
+threads_count = 1000  # adjust based on your CPU
 image_path = list(range(0, len(train_url)))
 if __name__ == '__main__':
-    with multiprocessing.Pool(1000) as p:
-        not_found = p.map(blah, image_path)
-unavailable = []
-for i, x in enumerate(not_found):
+    with multiprocessing.Pool(threads_count) as p:
+        temp_not_found = p.map(image_downloader, image_path)
+not_found = []
+for i, x in enumerate(temp_not_found):
     if x != -1:
-        unavailable.append(x)
-print(unavailable)
+        not_found.append(x)
+print(not_found)
