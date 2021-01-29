@@ -4,4 +4,5 @@ This project takes an image and generates a suitable caption. It uses one of the
 Here is an example:
 
 ![Image 11365](/11365.png)
+
 Caption: a street corner with a light in front of it
